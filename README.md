@@ -24,12 +24,4 @@ npm install
 npm run dev
 ```
 
-## Deploy to Vercel using GitHub
 
-1. Create a new GitHub repository.
-2. Upload/push the contents of this folder to the repository (the `package.json` must be at the repository root).
-3. In Vercel, choose **Add New → Project** and import that GitHub repository.
-4. Vercel should detect **Vite** automatically.
-5. Keep the build command as `npm run build` and output directory as `dist`, then click **Deploy**.
-
-Every push to the connected branch can trigger a new deployment.
