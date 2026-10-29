@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { createRoot } from 'react-dom/client'
 import { Calculator, BookOpen, Plus, RotateCcw, Trash2, Info, GraduationCap, ChevronDown } from 'lucide-react'
 import './style.css'
@@ -26,11 +26,33 @@ const initialScale = [
 const clamp = (value, max) => Math.min(max, Math.max(0, Number(value) || 0))
 const getTotal = (s) => (s.cie.reduce((a, b) => a + b, 0) / 3 / 30) * 25 + (s.see / 100) * 50 + s.assignment
 const getGrade = (total, scale) => [...scale].sort((a,b) => b.min-a.min).find(x => total >= x.min) || scale[scale.length-1]
+const STORAGE_KEY = 'gradepilot-semester-data-v1'
+
+function loadSavedData() {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY)
+    if (!saved) return null
+    const parsed = JSON.parse(saved)
+    if (!Array.isArray(parsed.subjects) || !Array.isArray(parsed.scale)) return null
+    return parsed
+  } catch {
+    return null
+  }
+}
 
 function App() {
-  const [subjects, setSubjects] = useState(defaultSubjects)
-  const [scale, setScale] = useState(initialScale)
+  const [savedData] = useState(loadSavedData)
+  const [subjects, setSubjects] = useState(() => savedData?.subjects ?? defaultSubjects)
+  const [scale, setScale] = useState(() => savedData?.scale ?? initialScale)
   const [showScale, setShowScale] = useState(false)
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({ subjects, scale }))
+    } catch (error) {
+      console.warn('GradePilot could not save data in this browser.', error)
+    }
+  }, [subjects, scale])
 
   const results = useMemo(() => subjects.map(s => {
     const total = getTotal(s)
@@ -49,7 +71,7 @@ function App() {
   return <main className="app-shell">
     <header className="topbar">
       <a className="brand" href="#"><span className="brand-icon"><GraduationCap size={21}/></span><span>gradepilot</span></a>
-      <span className="top-note">SEMESTER PERFORMANCE TOOL</span>
+      <span className="top-note">AUTO-SAVED ON THIS DEVICE</span>
     </header>
 
     <section className="hero">
